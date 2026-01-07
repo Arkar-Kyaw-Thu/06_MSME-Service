@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - Payments</title>
+  <style>
+    /* Existing styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      min-height: 100vh;
+      background-color: #f0f2f5;
+      position: relative;
+    }
+    .sidebar {
+      width: 220px;
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 20px;
+      position: fixed;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo img {
+      max-width: 100%;
+      height: 60px;
+      object-fit: contain;
+    }
+    .nav-links {
+      width: 100%;
+    }
+    .nav-links a {
+      display: block;
+      color: #ecf0f1;
+      text-decoration: none;
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      transition: 0.3s;
+    }
+    .nav-links a:hover {
+      background-color: #34495e;
+    }
+    .active {
+      background-color: #34495e;
+    }
+    .main {
+      margin-left: 220px;
+      padding: 20px;
+      flex-grow: 1;
+    }
+    .card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      min-width: 800px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ccc;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #ecf0f1;
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+    @media (max-width: 768px) {
+      .main {
+        margin-left: 0;
+      }
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      .nav-links a {
+        margin: 5px 10px;
+        padding: 10px;
+      }
+      .logo {
+        margin-bottom: 20px;
+      }
+    }
+
+    /* Floating payment form container */
+    #payment-form-overlay {
+      position: fixed;
+      top: 50px;
+      left: 230px;
+      right: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      z-index: 9999;
+    }
+    #payment-form-overlay h4 {
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    #payment-form-overlay .close-btn {
+      float: right;
+      font-size: 20px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+      margin-top: -5px;
+      margin-right: -5px;
+    }
+    #payment-form-overlay .close-btn:hover {
+      color: #444;
+    }
+    #payment-form-overlay label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #payment-form-overlay input[type="text"],
+    #payment-form-overlay input[type="tel"],
+    #payment-form-overlay input[type="hidden"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #payment-form-overlay table {
+      margin-top: 15px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #payment-form-overlay table th,
+    #payment-form-overlay table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    #payment-form-overlay table th {
+      background-color: #ecf0f1;
+    }
+    #payment-form-overlay .loan-section {
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+    }
+    #payment-form-overlay button.confirm-btn {
+      margin-top: 20px;
+      background-color: #27ae60;
+    }
+    #payment-form-overlay button.confirm-btn:hover {
+      background-color: #219150;
+    }
+    #payment-form-overlay button.cancel-btn {
+      margin-top: 20px;
+      background-color: #e74c3c;
+      margin-left: 10px;
+      color: white;
+    }
+    #payment-form-overlay button.cancel-btn:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <img src="https://via.placeholder.com/150x60?text=Your+Logo" alt="Project Logo" />
+    </div>
+
+    <div class="nav-links">
+      <a href="/viewDashboard">Dashboard</a>
+      <a href="/viewVendors">Vendors</a>
+      <a href="/viewInventory">Inventory</a>
+      <a href="/viewOrders">Orders</a>
+      <a href="/viewCustomer" class="active">CustomerOrders</a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="card full-width">
+      <h3>Customer Payment Dataset</h3>
+      <div id="payment-table-container">
+        <p>Loading payments...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Payment Detail Form -->
+  <div id="payment-form-overlay" style="display:none;"></div>
+
+  <script>
+  const BASE_API_URL = "http://192.168.181.241:4003/api";
+
+  async function fetchApiData(endpoint) {
+    try {
+      const response = await fetch(`${BASE_API_URL}/${endpoint}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  function escapeHtml(text) {
+    if (text === undefined || text === null) return '-';
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function createPaymentTable(payments) {
+    if (!payments || payments.length === 0) {
+      return '<p>No payments found or failed to fetch data.</p>';
+    }
+
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Payment ID</th>
+            <th>Customer ID</th>
+            <th>Item IDs</th>
+            <th>Quantities</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    payments.forEach(payment => {
+      html += `
+        <tr>
+          <td>${escapeHtml(payment.payment_id)}</td>
+          <td>${escapeHtml(payment.customer_id)}</td>
+          <td>${Array.isArray(payment.item_id) ? escapeHtml(payment.item_id.join(", ")) : '-'}</td>
+          <td>${Array.isArray(payment.qty) ? escapeHtml(payment.qty.join(", ")) : '-'}</td>
+          <td>${escapeHtml(payment.amount)}</td>
+          <td>${escapeHtml(payment.method)}</td>
+          <td>${escapeHtml(payment.address)}</td>
+          <td>${escapeHtml(payment.phno)}</td>
+          <td>${escapeHtml(payment.status)}</td>
+          <td>${escapeHtml(payment.date)}</td>
+          <td>
+            <button onclick="showPaymentForm('${escapeHtml(payment.payment_id)}')">Check</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  async function showPaymentForm(payment_id) {
+    const overlay = document.getElementById('payment-form-overlay');
+    overlay.innerHTML = '<p>Loading payment details...</p>';
+    overlay.style.display = 'block';
+
+    const payment = await fetchApiData(`payment/${payment_id}`);
+    if (!payment || payment.error) {
+      overlay.innerHTML = '<p>Failed to load payment details.</p>';
+      return;
+    }
+
+    const allItems = await fetchApiData('items');
+    if (!allItems) {
+      overlay.innerHTML = '<p>Failed to load items data.</p>';
+      return;
+    }
+
+    const itemMap = {};
+    allItems.forEach(item => {
+      itemMap[item.item_id] = item;
+    });
+
+    let totalPrice = 0;
+    let itemsRows = '';
+    for (let i = 0; i < (payment.item_id?.length || 0); i++) {
+      const id = payment.item_id[i];
+      const qty = payment.qty[i];
+      const item = itemMap[id] || { item_name: 'Unknown', price: 0 };
+      const price = item.price || 0;
+      const total = price * qty;
+      totalPrice += total;
+
+      itemsRows += `
+        <tr>
+          <td>${escapeHtml(id)}</td>
+          <td>${escapeHtml(item.item_name)}</td>
+          <td>${qty}</td>
+          <td>${price.toLocaleString()}</td>
+          <td>${total.toLocaleString()}</td>
+        </tr>
+      `;
+    }
+
+    itemsRows += `
+      <tr style="font-weight:bold;">
+        <td colspan="4" style="text-align:right;">Total Price</td>
+        <td>${totalPrice.toLocaleString()}</td>
+      </tr>
+    `;
+
+    const isConfirmed = (payment.status || "").toLowerCase() === "order";
+
+    let formHTML = `
+      <span class="close-btn" onclick="closePaymentForm()">&times;</span>
+      <h4>Payment Details (Date: ${escapeHtml(payment.date)})</h4>
+
+      <form id="payment-detail-form" onsubmit="event.preventDefault(); confirmPayment();">
+        <input type="hidden" name="payment_id" id="payment_id" value="${escapeHtml(payment.payment_id)}" />
+
+        <label for="customer_id">Customer ID</label>
+        <input type="text" id="customer_id" name="customer_id" value="${escapeHtml(payment.customer_id)}" readonly />
+
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" value="${escapeHtml(payment.address)}" />
+
+        <label for="phno">Phone Number</label>
+        <input type="tel" id="phno" name="phno" value="${escapeHtml(payment.phno)}" />
+
+        <h5>Items</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Item ID</th>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsRows}
+          </tbody>
+        </table>
+    `;
+
+    if (payment.method === "payment") {
+      formHTML += `
+        <button type="submit" class="confirm-btn" ${!isConfirmed ? "disabled" : ""}>Confirm</button>
+      `;
+      formHTML += `</form>`;
+    } else if (payment.method === "Loan") {
+      const loanData = await fetchApiData(`loan_by_payment/${payment.payment_id}`);
+      if (!loanData || loanData.error) {
+        formHTML += `<p>Failed to load loan information.</p></form>`;
+      } else {
+        formHTML += `</form>
+          <div class="loan-section" style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc;">
+            <h5 style="margin: 0;">Loan Information</h5>
+            <button type="button" onclick="testLoans('${escapeHtml(loanData.loan_id)}')" style="padding: 6px 12px; background-color: #2980b9; color: white; border: none; border-radius: 4px; cursor: pointer;">Test</button>
+
+          </div>
+          <table style="margin-top: 10px; width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr><th>Field</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>loan_id</td><td>${escapeHtml(loanData.loan_id)}</td></tr>
+              <tr><td>payment_id</td><td>${escapeHtml(loanData.payment_id)}</td></tr>
+              <tr><td>name</td><td>${escapeHtml(loanData.name)}</td></tr>
+              <tr><td>age</td><td>${escapeHtml(loanData.age)}</td></tr>
+              <tr><td>annual_income</td><td>${escapeHtml(loanData.annual_income)}</td></tr>
+              <tr><td>marital_status</td><td>${escapeHtml(loanData.marital_status)}</td></tr>
+              <tr><td>education</td><td>${escapeHtml(loanData.education)}</td></tr>
+              <tr><td>credit_score</td><td>${escapeHtml(loanData.credit_score)}</td></tr>
+            </tbody>
+          </table>
+          <button onclick="confirmPayment()" class="confirm-btn" ${!isConfirmed ? "disabled" : ""}>Confirm Loan Payment</button>
+          <button type="button" class="cancel-btn" onclick="rejectPayment()" ${!isConfirmed ? "disabled" : ""}>Reject</button>
+        `;
+      }
+    }
+
+    overlay.innerHTML = formHTML;
+  }
+
+  function closePaymentForm() {
+    const overlay = document.getElementById('payment-form-overlay');
+    overlay.style.display = 'none';
+    overlay.innerHTML = '';
+  }
+
+  async function confirmPayment() {
+  const payment_id = document.getElementById('payment_id').value;
+  try {
+    const response = await fetch(`${BASE_API_URL}/confirmPayment`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({payment_id})
+    });
+    const result = await response.json();
+    if (response.ok) {
+      closePaymentForm();
+      loadPayments();
+    } else {
+      alert(`Failed to confirm payment: ${result.error || 'Unknown error'}`);
+    }
+  } catch (error) {
+    alert(`Error confirming payment: ${error.message}`);
+  }
+}
+
+async function rejectPayment() {
+  const payment_id = document.getElementById('payment_id').value;
+  try {
+    const response = await fetch(`${BASE_API_URL}/rejectPayment`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({payment_id})
+    });
+    const result = await response.json();
+    if (response.ok) {
+      closePaymentForm();
+      loadPayments();
+    } else {
+      alert(`Failed to reject payment: ${result.error || 'Unknown error'}`);
+    }
+  } catch (error) {
+    alert(`Error rejecting payment: ${error.message}`);
+  }
+}
+
+async function testLoans(loan_id) {
+  if (!loan_id) {
+    alert("Please provide a loan ID.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_API_URL}/testLoans`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ loan_id })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(`💳 Loan Test Result:
+- ✅ Approved: ${result.loan_approval}
+- 📊 Repayment Probability: ${result.repayment_probability}%
+- 🔍 Cluster: ${result.cluster}`);
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+  } catch (error) {
+    alert(`Request failed: ${error.message}`);
+  }
+}
+
+  async function loadPayments() {
+    const payments = await fetchApiData('payments');
+    const container = document.getElementById('payment-table-container');
+    container.innerHTML = createPaymentTable(payments);
+  }
+
+  // Load payments on page load
+  window.addEventListener('DOMContentLoaded', loadPayments);
+  
+  </script>
+
+</body>
+</html>

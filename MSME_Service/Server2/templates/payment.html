@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background-color: #333;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 1000;
+    }
+    .navbar .logo {
+      display: flex;
+      align-items: center;
+    }
+    .navbar .logo img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .navbar .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .navbar .right button {
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .quit-btn {
+      background-color: #ff4d4d;
+    }
+    .main-content {
+      flex: 1;
+      padding: 90px 20px 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .order-form-grid {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .order-section {
+      flex: 2;
+      min-width: 300px;
+    }
+    .form-section {
+      flex: 1;
+      min-width: 250px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .hidden {
+      display: none;
+    }
+    h2, h3 {
+      margin-bottom: 10px;
+    }
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    @media (max-width: 768px) {
+      .order-form-grid {
+        flex-direction: column;
+      }
+      .form-section {
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo">
+      <img src="https://via.placeholder.com/40" alt="Logo" />
+      <span>Project Name</span>
+    </div>
+    <div class="right">
+      <span>Welcome, Username</span>
+      <a href="/"><button class="quit-btn">Quit</button></a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="order-form-grid">
+
+      <!-- Order Table -->
+      <div class="order-section">
+        <h2>Review Your Order</h2>
+        <table id="orderTable">
+          <thead>
+            <tr>
+              <th>Item ID</th><th>Item Name</th><th>Price</th><th>Quantity</th><th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4" style="text-align:right;">Total:</th>
+              <th id="totalAmount">$0.00</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Delivery Form & Confirm -->
+      <div class="form-section">
+        <h2>Delivery Info</h2>
+        <form id="deliveryForm">
+          <input type="hidden" id="customerId" value="C001" />
+          <label>Address:</label>
+          <input type="text" id="address" required />
+          <label>Phone Number:</label>
+          <input type="text" id="phno" required />
+
+          <label>Payment Method:</label>
+          <select id="method" onchange="toggleLoanForm()">
+            <option value="payment">Payment</option>
+            <option value="Loan">Loan</option>
+          </select>
+        </form>
+
+        <!-- Loan Fields (Hidden) -->
+        <div id="loanFields" class="hidden">
+          <h3>Loan Application Info</h3>
+          <label>Name:</label>
+          <input type="text" id="loanName" />
+          <label>Age:</label>
+          <input type="number" id="loanAge" />
+          <label>Annual Income:</label>
+          <input type="number" id="loanIncome" />
+          <label>Marital Status:</label>
+          <select id="loanMarital">
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+          </select>
+          <label>Education:</label>
+          <select id="loanEducation">
+            <option value="High School">High School</option>
+            <option value="Diploma">Diploma</option>
+            <option value="Bachelor">Bachelor</option>
+            <option value="Master">Master/PhD</option>
+          </select>
+          <label>Credit Score:</label>
+          <input type="number" id="loanCredit" />
+        </div>
+
+        <button onclick="showConfirm()">Pay</button>
+
+        <div id="confirmSection" class="hidden" style="margin-top: 20px;">
+          <h3>Confirm Payment</h3>
+          <button onclick="proceedPayment()">Confirm & Pay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 Your Company Name. All rights reserved.
+  </footer>
+
+  <script>
+    const tbody = document.querySelector("#orderTable tbody");
+    const totalAmountEl = document.getElementById("totalAmount");
+
+    const cart = JSON.parse(localStorage.getItem("cartForPayment")) || [];
+    console.log("Loaded cartForPayment:", cart);
+
+    if (cart.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5">No items found in cart.</td></tr>';
+    } else {
+      let total = 0;
+      cart.forEach(item => {
+        const itemId = item.itemId || "N/A";
+        const name = item.name || "";
+        const price = item.price || 0;
+        const qty = item.qtyInCart || 0;
+        const subtotal = price * qty;
+        total += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${itemId}</td>
+          <td>${name}</td>
+          <td>$${price.toFixed(2)}</td>
+          <td>${qty}</td>
+          <td>$${subtotal.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+      totalAmountEl.textContent = "$" + total.toFixed(2);
+    }
+
+    function toggleLoanForm() {
+      const method = document.getElementById("method").value;
+      const loanSection = document.getElementById("loanFields");
+      if (method === "Loan") {
+        loanSection.classList.remove("hidden");
+      } else {
+        loanSection.classList.add("hidden");
+      }
+    }
+
+    function showConfirm() {
+      document.getElementById("confirmSection").classList.remove("hidden");
+    }
+
+    function proceedPayment() {
+      const address = document.getElementById("address").value;
+      const phno = document.getElementById("phno").value;
+      const customerId = document.getElementById("customerId").value;
+      const method = document.getElementById("method").value;
+
+      if (!address || !phno) {
+        alert("Please fill in address and phone number.");
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert("Cart is empty.");
+        return;
+      }
+
+      const payload = {
+        customer_id: customerId,
+        cart: cart,
+        address: address,
+        phno: phno,
+        method: method,
+        status: "Order"
+      };
+
+      fetch("http://192.168.181.241:4004/proceedPayment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.error) {
+          alert("Payment Error: " + result.error);
+          return;
+        }
+
+        const paymentId = result.payment.payment_id;
+
+        if (method === "Loan") {
+          const loanPayload = {
+            payment_id: paymentId,
+            name: document.getElementById("loanName").value,
+            age: parseInt(document.getElementById("loanAge").value),
+            annual_income: parseFloat(document.getElementById("loanIncome").value),
+            marital_status: document.getElementById("loanMarital").value,
+            education: document.getElementById("loanEducation").value,
+            credit_score: parseInt(document.getElementById("loanCredit").value)
+          };
+
+
+          fetch("http://192.168.181.241:4004/proceedloan", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(loanPayload)
+          })
+          .then(res => res.json())
+          .then(loanResult => {
+            if (loanResult.error) {
+              alert("Loan Error: " + loanResult.error);
+            } else {
+              localStorage.removeItem("cartForPayment");
+              alert("Loan & Payment Successful! Loan ID: " + loanResult.loan.loan_id);
+              window.location.href = "/";
+            }
+          });
+        } else {
+          localStorage.removeItem("cartForPayment");
+          alert("Payment successful! Payment ID: " + paymentId);
+          window.location.href = "/";
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Could not complete transaction.");
+      });
+    }
+  </script>
+
+</body>
+</html>
